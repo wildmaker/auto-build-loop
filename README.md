@@ -1,4 +1,12 @@
-# Epic Auto Build v2 Skill Pack
+# auto-build-loop
+
+## Quick Start
+
+在 CLI 中使用一条命令触发流程：
+
+```bash
+@auto-build-v2
+```
 
 这个目录用于分发 Epic 自动化开发流程（Plan -> SDD Loop -> Review/Demo -> Stabilization -> Merge）。
 
@@ -68,6 +76,23 @@
 - report-it-to-me
 - xmind
 
+## Simple workflow overview
+
+```mermaid
+flowchart TD
+    A["1. Planning & Scope Lock<br/>- 明确目标与交付边界<br/>- 拆分可独立完成的工作项<br/>- 建立统一工作基线"] --> B["2. Iterative Delivery Loop（一次一个工作项）<br/>- 选择一个未完成任务<br/>- 在隔离环境中实现<br/>- 本地校验 + 自动化检查<br/>- 提交审查（PR / CI）<br/>- 合并到集成分支"]
+    B --> C{"是否还有未完成项"}
+    C -- 是 --> B
+    C -- 否 --> D["3. Integrated Review / Demo<br/>- 全量功能可运行<br/>- 与最初目标对齐<br/>- 工程层面完成确认"]
+    D --> E["4. Stabilization & Triage<br/>- 集中测试<br/>- 问题分类与分流"]
+    E --> F["Implementation Bugs / Gaps<br/>- 修复实现<br/>- 补测试"]
+    E --> G["Requirement / Behavior Change<br/>- 回到迭代流程<br/>- 重新定义目标"]
+    F --> H["重新进入 2 或 4"]
+    G --> H
+    H --> I["5. Release / Merge to Main<br/>- 明确发布条件满足<br/>- 合并至主线<br/>- 标记交付完成"]
+    I --> J["6. Post-Completion Cleanup（可选）<br/>- 归档过程产物<br/>- 清理临时分支 / 资源<br/>- 必须显式确认"]
+```
+
 ## Flow canvas
 
 > 目标：用一张图快速说明 `epic-auto-build-v2` 的执行阶段、强约束与回路。
@@ -109,7 +134,3 @@ flowchart TD
 - `Phase 4` 是收敛分流：Fix 留在稳定化链路，Change 回流到 `SDD LOOP` 重新走 Spec 驱动交付。
 - 只有 `ready_for_merge: true` 才能进入 `epic/* -> main`。
 - `spec/*` 分支默认保留，只有在 Epic 完成后且用户明确确认才批量清理。
-
-## Notes
-- 已按目录原样复制各 skill，保留了其 `references/`、`scripts/`、`protocol/` 等相关文件。
-- `epic-workflow.md` 已放在本目录根部，便于作为流程主文档一并分发。
