@@ -2,10 +2,13 @@
 
 ## Quick Start
 
-在 CLI 中使用一条命令触发流程：
+先完成以下 2 步，再触发自动化流程：
+
+1. 使用 GPT PRO 产出整体设计思路，并将文档保存到项目内（例如 `docs/blueprint.md`）。
+2. 在 CLI 中使用 `@auto-build-v2` 并附上文档路径。
 
 ```bash
-@auto-build-v2
+@auto-build-v2 docs/blueprint.md
 ```
 
 这个目录用于分发 Epic 自动化开发流程（Plan -> SDD Loop -> Review/Demo -> Stabilization -> Merge）。
