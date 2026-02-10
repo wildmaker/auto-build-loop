@@ -5,7 +5,7 @@
 
 ### TL;DR｜推荐技能编排（5 阶段）
 
-- **Phase 1 Plan（拆分 & 初始化）**：`epic-breakdown`
+- **Phase 1 Sprint Planning（模式决策 & 初始化）**：`sprint-planning`
 - **Phase 2 Implement（逐条交付）**：对每个 backlog item 调用 `epic-sdd-loop`
 - **Phase 3 Review / Demo（价值验收）**：`epic-engineering-sign-off` → `epic-review-demo`
 - **Phase 4 Stabilization（Demo 后收敛）**：`epic-stabilization`
@@ -48,16 +48,10 @@ main
 - **merge 规则**：只允许 `spec/*` → `epic/*`；Epic 完成后 `epic/*` → `main`
 - **评审基准**：以 Spec Change 定义的行为与验收条件为准
 
-### PR 合并 gate（必须）
-
-- **等待远程 review**：合并前必须等待 reviewer（含自动 reviewer，例如 gemini-code-assist）产生 review/comments，并处理 High/Medium 优先级意见（按 `git-resolve-pr-comments` 的轮询约束执行）
-- **CI 全绿**：checks 未通过不得合并
-- **Spec 分支保留**：合并 `spec/*` PR 时不得删除 head 分支（禁止 `--delete-branch`）；若 repo 设置自动删除 merged 的 `spec/*`，应从 PR head SHA 恢复该分支，留待 Epic 完成后统一清理
-
 ### 工件清单（你应该看到的东西）
 
 - **Plan**：`Implementation Plan.md`
-- **Backlog**：根目录唯一的 `BACKLOG.md`（含多个 Epic；目标 Epic 分组头部包含 `Epic branch` 与 `Epic branch URL`）
+- **Backlog**：根目录唯一的 `BACKLOG.md`（含多个 Epic）
 - **Issues**：与 backlog items 一一对应
 - **Spec Changes**：`OpenSpec/changes/<spec-name>`（与 Issue 一一对应）
 - **Branches/PRs**：`spec/*` PR 只能指向 `epic/*`；Epic PR 指向 `main`
@@ -65,16 +59,20 @@ main
 
 ### Phase Guide｜阶段说明（输入/输出/退出条件）
 
-#### Phase 1：Plan（`epic-breakdown`）
+#### Phase 1：Sprint Planning（`sprint-planning`）
 
-- **输入**：Blueprint/设计文档路径、`<epic-name>`、`<base-branch>`（默认 `main`）
+- **输入**：Blueprint/设计文档路径、`<base-branch>`（默认 `main`）
+- **核心动作**：
+  - 调用 `multi-agent-parallel-gate` 做交付模式决策（Single Owner vs Multi-Role Team）
+  - 仅当并行效率提升达到阈值（>=30%）时允许多人力路径
+- **结果路由**：
+  - **结果 A（多人力）**：将需求拆分为多个 epic；每个 agent 负责一个 epic，并各自执行后续 Epic Workflow
+  - **结果 B（单人力）**：保持单 epic，由单一 owner 执行后续 Epic Workflow
 - **产出**：
-  - `Implementation Plan.md`
-  - `BACKLOG.md` 中新增/更新 `## <epic-name>` 分组（items 原子化）
-    - 该分组头部必须包含：`Epic branch: epic/<epic-name>` 与 `Epic branch URL: <repo_url>/tree/epic/<epic-name>`
-  - Issues 对齐（必要时回写编号到 `BACKLOG.md`）
-  - 建立并推送 `epic/<epic-name>` 分支
-- **退出条件**：Plan 可执行 + Backlog 可逐条交付 + Issues 对齐完成 + Epic 分支存在且正确
+  - Sprint Planning 决策记录（含时间评估与路由选择）
+  - 对应的 Epic 分配清单（A：多 epic；B：单 epic）
+  - 每个被启用 epic 的 `Implementation Plan.md` / `BACKLOG.md` 分组 / Issue 对齐 / `epic/<epic-name>` 分支（通过 `epic-breakdown` 完成）
+- **退出条件**：路由明确 + Epic 分配清晰 + 所有启用 epic 的初始化产物齐备且可进入 Phase 2
 
 #### Phase 2：Implement（`epic-sdd-loop`，一次只做一个 item）
 
@@ -120,13 +118,11 @@ Spec 要变 → Change（回到 Spec 驱动流程）
 
 ```text
 docs/
-└─ <epic-slug>/
-   ├─ Implementation Plan.md
-   ├─ EPIC-REPORT.md
-   ├─ EPIC-REPORT.xmind.json
-   └─ (其它本 Epic 新生成的文档/记录)
+└─ epics/<module>/<epic-name>/
+   ├─ blueprint.md
+   ├─ requirements.md
+   ├─ tech-plan.md
+   └─ ux.html
 ```
 
 - 这些文档用于协作与验收；**上线后的系统真相应收敛到 OpenSpec / Repo 实现**
-- 目录规范：本 Epic **新生成**的文档/报告应放在 `docs/<epic-slug>/`，不要直接堆在 `docs/` 根目录
-

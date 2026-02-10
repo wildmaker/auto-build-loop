@@ -5,7 +5,7 @@
 
 ### TL;DR｜推荐技能编排（5 阶段）
 
-- **Phase 1 Plan（拆分 & 初始化）**：`epic-breakdown`
+- **Phase 1 Sprint Planning（模式决策 & 初始化）**：`sprint-planning`
 - **Phase 2 Implement（逐条交付）**：对每个 backlog item 调用 `epic-sdd-loop`
 - **Phase 3 Review / Demo（价值验收）**：`epic-engineering-sign-off` → `epic-review-demo`
 - **Phase 4 Stabilization（Demo 后收敛）**：`epic-stabilization`
@@ -59,15 +59,20 @@ main
 
 ### Phase Guide｜阶段说明（输入/输出/退出条件）
 
-#### Phase 1：Plan（`epic-breakdown`）
+#### Phase 1：Sprint Planning（`sprint-planning`）
 
-- **输入**：Blueprint/设计文档路径、`<epic-name>`、`<base-branch>`（默认 `main`）
+- **输入**：Blueprint/设计文档路径、`<base-branch>`（默认 `main`）
+- **核心动作**：
+  - 调用 `multi-agent-parallel-gate` 做交付模式决策（Single Owner vs Multi-Role Team）
+  - 仅当并行效率提升达到阈值（>=30%）时允许多人力路径
+- **结果路由**：
+  - **结果 A（多人力）**：将需求拆分为多个 epic；每个 agent 负责一个 epic，并各自执行后续 Epic Workflow
+  - **结果 B（单人力）**：保持单 epic，由单一 owner 执行后续 Epic Workflow
 - **产出**：
-  - `Implementation Plan.md`
-  - `BACKLOG.md` 中新增/更新 `## <epic-name>` 分组（items 原子化）
-  - Issues 对齐（必要时回写编号到 `BACKLOG.md`）
-  - 建立并推送 `epic/<epic-name>` 分支
-- **退出条件**：Plan 可执行 + Backlog 可逐条交付 + Issues 对齐完成 + Epic 分支存在且正确
+  - Sprint Planning 决策记录（含时间评估与路由选择）
+  - 对应的 Epic 分配清单（A：多 epic；B：单 epic）
+  - 每个被启用 epic 的 `Implementation Plan.md` / `BACKLOG.md` 分组 / Issue 对齐 / `epic/<epic-name>` 分支（通过 `epic-breakdown` 完成）
+- **退出条件**：路由明确 + Epic 分配清晰 + 所有启用 epic 的初始化产物齐备且可进入 Phase 2
 
 #### Phase 2：Implement（`epic-sdd-loop`，一次只做一个 item）
 
@@ -121,4 +126,3 @@ docs/
 ```
 
 - 这些文档用于协作与验收；**上线后的系统真相应收敛到 OpenSpec / Repo 实现**
-
