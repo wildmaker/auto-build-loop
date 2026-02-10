@@ -10,7 +10,7 @@ version: 0.1.0
 @epic-engineering-sign-off
 
 ## Source of truth
-- 根目录 `epic-workflow.md`（关系模型与分支/合并约束）
+- `codex/skills/epic-auto-build-v2/references/epic-workflow.md`（关系模型与分支/合并约束）
 - 根目录 `BACKLOG.md`（Epic 交付清单与状态）
 
 ## What this skill does
@@ -68,4 +68,3 @@ Epic 对应的根目录 `BACKLOG.md` 分组下：
 
 ## Exit criteria（允许进入 Epic Review 的条件）
 - A/B/C 三组检查全部 Pass；否则必须先修复失败项再进入 Epic Review
-

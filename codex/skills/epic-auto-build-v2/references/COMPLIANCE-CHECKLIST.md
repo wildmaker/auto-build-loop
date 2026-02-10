@@ -25,7 +25,7 @@
 - [ ] `🤖 AUTO` 仓库根目录仅存在 **一个** `BACKLOG.md`（未创建子目录或独立 backlog 文件）
   > 检查方法：`find . -name 'BACKLOG.md'` 结果应只有 `./BACKLOG.md`
 
-### 0.3 关系模型（`epic-workflow.md` 强约束）
+### 0.3 关系模型（`references/epic-workflow.md` 强约束）
 - [ ] `🤖 AUTO` 1 Epic = 1 Plan = `BACKLOG.md` 中的 1 个 Epic 分组
   > 检查方法：在 `BACKLOG.md` 中搜索 `## <epic-name>`，确认只有一个匹配的 Epic 分组
 - [ ] `🤖 AUTO` 1 backlog item = 1 Issue = 1 Spec Change（`OpenSpec/changes/<spec-name>`）
@@ -33,7 +33,7 @@
 - [ ] `👤 HUMAN` Spec Change 是每个 Issue 的唯一设计权威（SSOT）；实现与验收以 Spec 为准
   > 需判断实现是否有偏离 Spec 的自行发挥
 
-### 0.4 分支模型（`epic-workflow.md` 强约束）
+### 0.4 分支模型（`references/epic-workflow.md` 强约束）
 - [ ] `🤖 AUTO` 分支层级为：`main` → `epic/<epic-name>` → `spec/<spec-name>`
   > 检查方法：`git branch -a` 确认分支命名符合 `epic/*` 和 `spec/*` 模式
 - [ ] `🤖 AUTO` 所有 `spec/*` 分支的 base 均为对应 `epic/*`（未直接基于 `main`）

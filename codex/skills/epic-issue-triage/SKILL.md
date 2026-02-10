@@ -10,7 +10,7 @@ version: 0.1.0
 @epic-issue-triage
 
 ## Source of truth
-- 根目录 `epic-workflow.md`（术语、分支/合并约束、稳定态纪律）
+- `codex/skills/epic-auto-build-v2/references/epic-workflow.md`（术语、分支/合并约束、稳定态纪律）
 - 当前 Epic 的既有 Spec 与变更：`OpenSpec/changes/*`（以已合并到 `epic/*` 的 Spec 为准）
 - 人工测试产生的问题清单（raw issues）
 
@@ -85,4 +85,3 @@ Spec 要变 → 重新走 Spec 流程
 5. 回写 `BACKLOG.md`（强制）
    - 调用子 Skill：`backlog-write-back`
    - 写回目标：在该 Epic 分组下新增/更新 `Stabilization (post-demo)` 区块，将 `fix_issues` / `change_issues` 写成可执行任务（包含稳定 `id`、描述、分类与原因；并尽量保证重复运行不产生重复条目）
-

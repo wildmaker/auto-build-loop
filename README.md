@@ -73,7 +73,7 @@
 ## Included workflow entry points
 - epic-auto-build-v2
 - epic-stabilization
-- epic-workflow.md
+- codex/skills/epic-auto-build-v2/references/epic-workflow.md
 
 ## Included dependent skills
 - epic-breakdown

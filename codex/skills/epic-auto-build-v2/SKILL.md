@@ -1,6 +1,6 @@
 ---
 name: epic-auto-build-v2
-description: Epic auto build v2 编排器：严格执行 epic-workflow.md 的 Complex-Change Workflow（Sprint Planning -> SDD LOOP -> Epic Review/Demo -> Epic Stabilization -> Merge）。
+description: Epic auto build v2 编排器：严格执行 references/epic-workflow.md 的 Complex-Change Workflow（Sprint Planning -> SDD LOOP -> Epic Review/Demo -> Epic Stabilization -> Merge）。
 version: 0.6.1
 ---
 
@@ -10,7 +10,7 @@ version: 0.6.1
 @epic-auto-build-v2
 
 ## What this skill does
-- 将一次“从设计到交付”的复杂变更工作流收敛为五个阶段，并**严格遵循本技能内置的 `references/epic-workflow.md` 关系模型与分支约束**（若仓库根目录存在 `epic-workflow.md`，可视为同等权威参考）：
+- 将一次“从设计到交付”的复杂变更工作流收敛为五个阶段，并**严格遵循本技能内置的 `references/epic-workflow.md` 关系模型与分支约束**：
   - Sprint Planning：调用 `sprint-planning` 做交付模式决策（Single Owner / Multi-Role Team）并初始化对应 epic
   - SDD LOOP：按 `references/SDD-LOOP.md` 的标准流程逐条完成 backlog item（一次只做一个；若仓库根目录存在 `SDD-LOOP.md`，可视为同等权威参考）
   - Epic Review / Demo（价值验收）：按 Plan 阶段定义的 Demo 目标与流程进行核心主场景演示，并汇总为报告（可选导图化）
@@ -19,7 +19,7 @@ version: 0.6.1
 
 ## Source of truth
 - `references/epic-workflow.md`：关系模型（Doc -> Backlog -> Epic -> Issue -> Spec Change -> Task）与分支/合并强约束
-- `references/SDD-LOOP.md`：每个 backlog item 的标准循环（本技能按 `epic-workflow.md` 的术语直接执行）
+- `references/SDD-LOOP.md`：每个 backlog item 的标准循环（本技能按 `references/epic-workflow.md` 的术语直接执行）
 
 ## Inputs (recommended)
 - `<design-doc-path>`：设计/产品/技术方案文档在仓库内的路径（可多个）
@@ -40,11 +40,11 @@ version: 0.6.1
 - 仅在用户明确提出 “epic auto build / epic-auto-build-v2”（旧名：auto-build-v2）时启用本技能。
 - **未完成 Sprint Planning（至少包含：交付模式决策 + 已启用 epic 的初始化产物）前不得开始编码。**
 - 一个 repo **只允许存在一个**根目录 `BACKLOG.md`；不要为 Epic 新建子目录或独立 backlog 文件。
-- **关系模型强约束（来自 `epic-workflow.md`）：**
+- **关系模型强约束（来自 `references/epic-workflow.md`）：**
   - 一个 Tech Implementation Plan（或等价设计文档集合）对应 `BACKLOG.md` 中的一个 Epic
   - 一个 backlog item（本技能中）= 一个 Issue = 一个 Spec Change（OpenSpec 变更目录）
   - Spec Change 是该 Issue 的唯一设计权威（single source of truth），内部再拆 Task
-- **分支模型强约束（来自 `epic-workflow.md`）：**
+- **分支模型强约束（来自 `references/epic-workflow.md`）：**
   - `main` → `epic/<epic-name>` → `spec/<spec-name>`
   - `spec/*` 的 base 必须是对应 `epic/*`；禁止直接基于 `main`
   - 合并只能：`spec/*` → `epic/*`；Epic 完成后：`epic/*` → `main`

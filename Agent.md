@@ -13,13 +13,13 @@
 ## 2. 核心入口与权威文档
 - 主编排 Skill：`codex/skills/epic-auto-build-v2/SKILL.md`
 - 稳定化主控 Skill：`codex/skills/epic-stabilization/SKILL.md`
-- 工作流权威文档：`epic-workflow.md`
+- 工作流权威文档：`codex/skills/epic-auto-build-v2/references/epic-workflow.md`
 - 参考流程细节：
   - `codex/skills/epic-auto-build-v2/references/epic-workflow.md`
   - `codex/skills/epic-auto-build-v2/references/SDD-LOOP.md`
   - `codex/skills/epic-auto-build-v2/references/COMPLIANCE-CHECKLIST.md`
 
-执行时优先遵循以上文件；冲突时以 `epic-auto-build-v2` 与 `epic-workflow.md` 的强约束为准。
+执行时优先遵循以上文件；冲突时以 `epic-auto-build-v2` 与 `codex/skills/epic-auto-build-v2/references/epic-workflow.md` 的强约束为准。
 
 ## 3. 总体工作流（当前版本）
 按五阶段执行：
@@ -60,7 +60,7 @@
 - 新文档应写入 Epic 文档目录（如 `docs/<epic-name>/`），不要堆在 `docs/` 根目录。
 
 ## 5. 资产使用建议（执行顺序）
-1. 读取 `epic-workflow.md`，确认阶段目标与分支关系。
+1. 读取 `codex/skills/epic-auto-build-v2/references/epic-workflow.md`，确认阶段目标与分支关系。
 2. 读取 `epic-auto-build-v2/SKILL.md`，按其 5 Phase 编排执行。
 3. 进入具体阶段时再读取对应子 skill：
 - Sprint Planning：`sprint-planning`（内部路由到 `multi-agent-parallel-gate` 与 `epic-breakdown`）

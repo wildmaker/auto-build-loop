@@ -11,7 +11,7 @@ version: 0.3.0
 
 ## Source of truth
 - 根目录 `SDD-LOOP.md`
-- 根目录 `epic-workflow.md`（术语与分支/合并约束）
+- `codex/skills/epic-auto-build-v2/references/epic-workflow.md`（术语与分支/合并约束）
 
 ## What this skill does
 - 对**一个 backlog item**执行一次完整的 SDD Loop：从 `epic/<epic-name>` 创建 `spec/<spec-name>`，初始化 Issue + Spec Change，应用变更并实现，通过本地最小检查后创建/评审 PR，CI 全绿后合并回 Epic 分支，最后归档 Spec Change
@@ -64,4 +64,3 @@ version: 0.3.0
    - 提交归档变更
    - 运行 `git-pr-review` 创建 PR（base 必须是 `<epic-branch>`；PR 中引用同一个 Issue 与 `<spec-name>`）
    - 按 `git-pr-review` / `git-resolve-pr-comments` 处理 High/Medium 评论后，再用 `git-merge-recent-pr` 合并（默认不删除 head 分支）
-
