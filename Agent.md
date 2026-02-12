@@ -13,22 +13,22 @@
 ## 2. 核心入口与权威文档
 - 主编排 Skill：`codex/skills/epic-auto-build-v2/SKILL.md`
 - 稳定化主控 Skill：`codex/skills/epic-stabilization/SKILL.md`
-- 工作流权威文档：`epic-workflow.md`
+- 工作流权威文档：`codex/skills/epic-auto-build-v2/references/epic-workflow.md`
 - 参考流程细节：
   - `codex/skills/epic-auto-build-v2/references/epic-workflow.md`
   - `codex/skills/epic-auto-build-v2/references/SDD-LOOP.md`
   - `codex/skills/epic-auto-build-v2/references/COMPLIANCE-CHECKLIST.md`
 
-执行时优先遵循以上文件；冲突时以 `epic-auto-build-v2` 与 `epic-workflow.md` 的强约束为准。
+执行时优先遵循以上文件；冲突时以 `epic-auto-build-v2` 与 `codex/skills/epic-auto-build-v2/references/epic-workflow.md` 的强约束为准。
 
 ## 3. 总体工作流（当前版本）
 按五阶段执行：
 
-1. Plan（`epic-breakdown`）
-- 输入设计文档，产出 `Implementation Plan.md`。
-- 在根目录 `BACKLOG.md` 创建/更新该 Epic 分组。
-- backlog item 与 GitHub Issue 对齐。
-- 创建并推送 `epic/<epic-name>` 作为实现基座。
+1. Sprint Planning（`sprint-planning`）
+- 先调用 `multi-agent-parallel-gate` 做交付模式决策（Single Owner / Multi-Role Team）。
+- 若为多人力：拆分多个 epic，每个 agent 负责一个 epic 并独立进入后续流程。
+- 若为单人力：保持单 epic，进入标准后续流程。
+- 每个启用 epic 的初始化由 `epic-breakdown` 完成（Plan/Backlog/Issue/epic 分支）。
 
 2. Implement（循环执行 `epic-sdd-loop`，一次一个 item）
 - 从 `epic/<epic-name>` 创建 `spec/<spec-name>`。
@@ -60,10 +60,10 @@
 - 新文档应写入 Epic 文档目录（如 `docs/<epic-name>/`），不要堆在 `docs/` 根目录。
 
 ## 5. 资产使用建议（执行顺序）
-1. 读取 `epic-workflow.md`，确认阶段目标与分支关系。
+1. 读取 `codex/skills/epic-auto-build-v2/references/epic-workflow.md`，确认阶段目标与分支关系。
 2. 读取 `epic-auto-build-v2/SKILL.md`，按其 5 Phase 编排执行。
 3. 进入具体阶段时再读取对应子 skill：
-- Plan：`epic-breakdown`
+- Sprint Planning：`sprint-planning`（内部路由到 `multi-agent-parallel-gate` 与 `epic-breakdown`）
 - Implement：`epic-sdd-loop` + `openspec-init-change` + PR 相关 skills
 - Review/Demo：`epic-engineering-sign-off`、`epic-review-demo`、`report-it-to-me`
 - Stabilization：`epic-stabilization`、`epic-issue-triage`、`epic-fix-stabilization`
@@ -85,4 +85,3 @@
 - `docs/<epic-name>/EPIC-REPORT.md`
 - 稳定化报告（如 `docs/<epic-name>/EPIC-STABILIZATION-REPORT.md`）
 - 相关 PR / Issue / Spec Change 可追溯链接
-

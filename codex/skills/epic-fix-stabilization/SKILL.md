@@ -12,7 +12,7 @@ version: 0.1.0
 ## Source of truth
 - `BACKLOG.md` 中该 Epic 的 fix 任务清单
 - 当前 Epic 的既有 Spec 与变更：`OpenSpec/changes/*`（Spec 不允许在本流程中改变）
-- `epic-workflow.md`（分支/合并约束）
+- `codex/skills/epic-auto-build-v2/references/epic-workflow.md`（分支/合并约束）
 
 ## Inputs (recommended)
 - `<epic-branch>`：默认 `epic/<epic-name>`
@@ -62,4 +62,3 @@ fix_stabilization_report:
    - PR 描述逐条列出已修复的 issues（含复现与验证方式）
    - CI 全绿后合并回 `<epic-branch>`
 5. 输出 `fix_stabilization_report`
-

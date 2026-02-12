@@ -1,6 +1,6 @@
 ---
 name: epic-auto-build-v2
-description: Epic auto build v2 编排器：严格执行 epic-workflow.md 的 Complex-Change Workflow（Plan -> SDD LOOP -> Epic Review/Demo -> Epic Stabilization -> Merge）。
+description: Epic auto build v2 编排器：严格执行 references/epic-workflow.md 的 Complex-Change Workflow（Sprint Planning -> SDD LOOP -> Epic Review/Demo -> Epic Stabilization -> Merge）。
 version: 0.6.1
 ---
 
@@ -10,8 +10,8 @@ version: 0.6.1
 @epic-auto-build-v2
 
 ## What this skill does
-- 将一次“从设计到交付”的复杂变更工作流收敛为五个阶段，并**严格遵循本技能内置的 `references/epic-workflow.md` 关系模型与分支约束**（若仓库根目录存在 `epic-workflow.md`，可视为同等权威参考）：
-  - Plan：产出 `Implementation Plan.md`，并把设计拆分为根目录 `BACKLOG.md` 中的一个 Epic（含 Issue 对齐）
+- 将一次“从设计到交付”的复杂变更工作流收敛为五个阶段，并**严格遵循本技能内置的 `references/epic-workflow.md` 关系模型与分支约束**：
+  - Sprint Planning：调用 `sprint-planning` 做交付模式决策（Single Owner / Multi-Role Team）并初始化对应 epic
   - SDD LOOP：按 `references/SDD-LOOP.md` 的标准流程逐条完成 backlog item（一次只做一个；若仓库根目录存在 `SDD-LOOP.md`，可视为同等权威参考）
   - Epic Review / Demo（价值验收）：按 Plan 阶段定义的 Demo 目标与流程进行核心主场景演示，并汇总为报告（可选导图化）
   - Epic Stabilization（稳定化收敛）：基于人工测试问题清单做分流，Fix 走集中修复，Change 回到 Spec 驱动开发，回归后达到可合并稳定态
@@ -19,7 +19,7 @@ version: 0.6.1
 
 ## Source of truth
 - `references/epic-workflow.md`：关系模型（Doc -> Backlog -> Epic -> Issue -> Spec Change -> Task）与分支/合并强约束
-- `references/SDD-LOOP.md`：每个 backlog item 的标准循环（本技能按 `epic-workflow.md` 的术语直接执行）
+- `references/SDD-LOOP.md`：每个 backlog item 的标准循环（本技能按 `references/epic-workflow.md` 的术语直接执行）
 
 ## Inputs (recommended)
 - `<design-doc-path>`：设计/产品/技术方案文档在仓库内的路径（可多个）
@@ -38,13 +38,13 @@ version: 0.6.1
 
 ## Constraints
 - 仅在用户明确提出 “epic auto build / epic-auto-build-v2”（旧名：auto-build-v2）时启用本技能。
-- **未完成 Plan 阶段（至少包含：`Implementation Plan.md` + `BACKLOG.md` + issues 对齐）前不得开始编码。**
+- **未完成 Sprint Planning（至少包含：交付模式决策 + 已启用 epic 的初始化产物）前不得开始编码。**
 - 一个 repo **只允许存在一个**根目录 `BACKLOG.md`；不要为 Epic 新建子目录或独立 backlog 文件。
-- **关系模型强约束（来自 `epic-workflow.md`）：**
+- **关系模型强约束（来自 `references/epic-workflow.md`）：**
   - 一个 Tech Implementation Plan（或等价设计文档集合）对应 `BACKLOG.md` 中的一个 Epic
   - 一个 backlog item（本技能中）= 一个 Issue = 一个 Spec Change（OpenSpec 变更目录）
   - Spec Change 是该 Issue 的唯一设计权威（single source of truth），内部再拆 Task
-- **分支模型强约束（来自 `epic-workflow.md`）：**
+- **分支模型强约束（来自 `references/epic-workflow.md`）：**
   - `main` → `epic/<epic-name>` → `spec/<spec-name>`
   - `spec/*` 的 base 必须是对应 `epic/*`；禁止直接基于 `main`
   - 合并只能：`spec/*` → `epic/*`；Epic 完成后：`epic/*` → `main`
@@ -63,7 +63,7 @@ version: 0.6.1
   - 必须运行 `report-it-to-me` 产出导图化产物（至少 `*.xmind.json`；`.xmind` 可选）
   - 以上产物必须提交并推送到 `<epic-branch>`；否则不得进入 Phase 5（Merge to base）
 - SDD LOOP 阶段必须遵循 `references/SDD-LOOP.md`（或仓库根目录同名文件）；每次只处理一个 backlog item（一次只推进一个 `spec/*`）。
-- 不臆测缺失需求：设计/验收不清晰时，先在 Plan 阶段标注 TBD + 风险 + 获取信息的建议；**默认不因“需要人类决策”而中断询问**（除非用户显式要求交互确认）。
+- 不臆测缺失需求：设计/验收不清晰时，先在 Sprint Planning 阶段标注 TBD + 风险 + 获取信息的建议；**默认不因“需要人类决策”而中断询问**（除非用户显式要求交互确认）。
 
 ## Autonomy defaults（默认无人监督 / 不要停下来问人）
 - 本技能默认以 **Autonomous / 无人监督** 模式执行：不要在阶段边界停下来让用户“选择下一步/选择从哪个 item 开始”。
@@ -77,6 +77,9 @@ version: 0.6.1
 - `backlog-generate`
 - `backlog-issue-sync`
 - `backlog-write-back`
+- `sprint-planning`
+- `multi-agent-parallel-gate`
+- `multi-agent-workflow-kickoff`
 - `epic-breakdown`
 - `epic-sdd-loop`
 - `epic-engineering-sign-off`
@@ -97,14 +100,18 @@ version: 0.6.1
 
 ## Workflow (5 phases)
 
-### Phase 1: Plan（拆分 BACKLOG）
-1. 运行 `epic-breakdown` 完成 Plan 阶段（输入/产出/退出条件以该 skill 定义为准）。
+### Phase 1: Sprint Planning（模式决策 & 初始化）
+1. 运行 `sprint-planning` 完成交付模式决策与路由（输入/产出/退出条件以该 skill 定义为准）。
+   - 结果 A：多人力多 epic（每个 agent 一个 epic）
+   - 结果 B：单人力单 epic
+2. 若命中结果 A（多人力多 epic），自动调用 `multi-agent-workflow-kickoff` 实际创建并启动并行 agents（不是仅发送文本消息）。
+3. 对每个被启用的 epic，运行 `epic-breakdown` 完成初始化。
    - 自检：`BACKLOG.md` 的目标 Epic 分组头部必须包含：
      - `Epic branch: epic/<epic-name>`
      - `Epic branch URL: <repo_url>/tree/epic/<epic-name>`
    - 若缺失：用 `backlog-write-back` 的 `epic_meta_update` 补齐（保持最小 diff）。
-2. 若 Plan 阶段产物（`Implementation Plan.md` / `BACKLOG.md` / 预检报告等）仍处于未提交状态：将其**提交并推送到 `<epic-branch>`**，确保后续 `spec/*` 都能以该基座为准。
-3. 在 Plan 文档中**明确 Demo 的目标与流程**（必须可执行、可复用），至少补充到 `Implementation Plan.md`：
+4. 若 Sprint Planning / 初始化产物（`Implementation Plan.md` / `BACKLOG.md` / 预检报告等）仍处于未提交状态：将其**提交并推送到对应 `<epic-branch>`**，确保后续 `spec/*` 都能以该基座为准。
+5. 在各 epic 的计划文档中**明确 Demo 的目标与流程**（必须可执行、可复用），至少补充到 `Implementation Plan.md`：
    - Demo 的价值目标（本 Epic 的核心主场景要证明什么）
    - Demo 前置条件：环境/依赖服务/账号与数据准备/关键环境变量清单
    - 如何运行：安装依赖 + Build 或启动项目的命令（含目录、package manager、端口等）
@@ -143,7 +150,7 @@ version: 0.6.1
 - 运行 `epic-engineering-sign-off` 完成 Epic Completion Check（Backlog Consistency / Spec Closure / Branch Integrity），通过后才允许进入 Epic Review
 
 ### Phase 3: Epic Review / Demo（价值验收）
-目标：按 Plan 阶段定义的 Demo 目标与流程完成价值验收；并把“做了什么、交付了什么、怎么验证”汇总给人类快速审阅（可选导图化 `.xmind`）。
+目标：按 Sprint Planning 阶段定义的 Demo 目标与流程完成价值验收；并把“做了什么、交付了什么、怎么验证”汇总给人类快速审阅（可选导图化 `.xmind`）。
 
 1. 在 `<epic-docs-dir>` 下生成项目汇总 Markdown（禁止写在 `docs/` 根目录）
    - 推荐路径：`<epic-docs-dir>/EPIC-REPORT.md`
@@ -152,7 +159,7 @@ version: 0.6.1
    - 输入（必填）：项目汇总 Markdown 的路径（`<markdown-path>`，建议即上一步的 `.../EPIC-REPORT.md`）
    - 输入（可选）：`<xmind-path>`（默认与 Markdown 同目录、同名 `.xmind`）、`<root-title>`、`<json-path>`（默认同目录 `*.xmind.json`）
    - 输出：单个 `.xmind` 文件（建议 `open <xmind-path>` 用系统默认应用打开检查）
-3. 运行 `epic-review-demo` 按 Plan 阶段文档定义进行 Demo（输入/产出/约束以该 skill 定义为准）
+3. 运行 `epic-review-demo` 按 Sprint Planning 阶段文档定义进行 Demo（输入/产出/约束以该 skill 定义为准）
 4. 将 Phase 3 的产物提交并推送到 `<epic-branch>`（至少提交 Markdown；`.xmind` 若不适合入库可只提交 `*.xmind.json`）
 
 ### Phase 4: Epic Stabilization（Demo 后稳定化收敛）
@@ -175,4 +182,3 @@ version: 0.6.1
    - 兜底：从 GitHub 已合并的 `spec/* → <epic-branch>` PR 列表中收集 `headRefName`
 2. 输出候选列表并询问用户一次（Yes/No）：是否批量删除这些**已合并**的远端 `spec/*` 分支？
 3. 仅当用户明确确认后才执行删除；否则跳过并保留全部分支。
-
