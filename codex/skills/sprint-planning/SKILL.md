@@ -19,9 +19,11 @@ description: 在 Epic 工作流开始前执行 Sprint Planning：先调用 `mult
 
 ## Hard constraints
 - 必须先调用 `multi-agent-parallel-gate`，再决定路径。
-- 只有当 gate 输出满足并行阈值（效率提升 >=30%）时，允许进入结果 A。
+- 仅当满足其一时允许进入结果 A：gate 输出满足并行阈值（效率提升 >=30%）或用户显式要求 `multi-agent delivery mode`。
 - 结果 A 中每个 agent 负责一个 epic，不得跨 epic 直接互改实现。
 - 结果 B 中保持单人单 epic，不强行拆分多个 epic。
+- Sprint Planning 不是终点：完成路由判定后必须立即进入后续执行，不允许停在“等待用户选择下一步”。
+- 若用户未显式要求暂停/仅输出计划，默认继续执行到至少触发对应 epic 的 `epic-breakdown`。
 
 ## Steps
 1. 调用 `multi-agent-parallel-gate`，获得 `Delivery Mode` 与时间评估。
@@ -33,6 +35,9 @@ description: 在 Epic 工作流开始前执行 Sprint Planning：先调用 `mult
    - 仅建立一个 epic。
    - 由单一 owner 按标准 Epic 流程串行执行后续阶段。
 4. 输出 Sprint Planning 决策记录与执行矩阵。
+5. 输出后立刻继续执行（不可停顿）：
+   - 结果 A：先调用 `multi-agent-workflow-kickoff` 实际派生并启动并行 agent（每个 epic 一个），再由各 agent 各自进入 `epic-breakdown`。
+   - 结果 B：直接对该单一 epic 调用 `epic-breakdown`。
 
 ## Output format (must follow)
 ```md
@@ -53,6 +58,7 @@ Epic Assignment
 Next Actions
 - Each epic owner starts from: epic-breakdown
 - Workflow per epic: epic-workflow phases 2-5
+- Executor mode: Continue immediately after route decision (no pause for route confirmation)
 ```
 
 ## Allowed commands

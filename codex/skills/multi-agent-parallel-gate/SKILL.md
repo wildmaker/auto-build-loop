@@ -14,17 +14,19 @@ description: 在需求文档或技术设计文档进入任务拆分前，先做�
 
 ## Hard constraints
 - 只做交付模式决策，不做额外架构设计。
+- 本技能输出仅作为“路由门禁”结果，不是工作流终点；调用方在拿到结果后必须继续执行对应后续阶段。
 - 禁止引入复杂前置产物（例如 Module Map、任务 DAG、冻结面等）。
 - 任何不确定场景默认 `Single Owner`。
 - 若需求无法映射到至少 2 个可独立推进的 role，强制 `Single Owner`。
 - 只有在 `Multi-Role Team` 相比 `Single Owner` 能显著提升效率时，才允许并行。
-- “显著提升”的默认阈值为：`Efficiency Gain >= 30%`。
+- “显著提升”的默认阈值为：`Efficiency Gain >= 30%`（用户显式要求 `multi-agent delivery mode` 时可跳过）。
 - `cross-layer` 模式下保持单 backlog item，不得拆成多个功能目标。
 - 默认最小团队为 2-3 角色；无明确需要不得扩张角色数量。
 
 ## Inputs
 - `doc_path`: 需求文档或技术设计文档路径
 - `scope_note` (optional): 用户补充范围/目标（若有）
+- `delivery_mode_override` (optional): 用户显式指定交付模式（支持 `multi-agent`）
 
 ## Role catalog (lightweight)
 - `frontend`
@@ -44,7 +46,10 @@ description: 在需求文档或技术设计文档进入任务拆分前，先做�
   - outputs: 安全检查结论、必要修复项
 
 ## Decision workflow (binary gate)
-1. 读取文档，提炼功能目标、影响范围、涉及层级、接口依赖、测试要求。
+0. 先检查短路条件（用户显式要求优先）：
+  - 若用户明确要求 `multi-agent delivery mode`（或等价表述），直接输出 `Delivery Mode = Multi-Role Team`。
+  - 此时跳过 Gate A / Gate B / 效率阈值判断，但仍需输出固定模板与角色映射。
+1. 若未命中短路：读取文档，提炼功能目标、影响范围、涉及层级、接口依赖、测试要求。
 2. 做本质选择：选择交付模式（`Single Owner` vs `Multi-Role Team`）。
   - 目标：在满足质量前提下最小化总交付时间与协作复杂度；仅当并行效率提升 `>=30%` 时选择 `Multi-Role Team`。
   - Gate A: `module-isolated`
@@ -74,6 +79,10 @@ description: 在需求文档或技术设计文档进入任务拆分前，先做�
   - Agent A: `frontend`
   - Agent B: `backend`
   - Agent C: `qa`
+- `user-forced-multi-agent` (short-circuit):
+  - Agent A: `frontend`
+  - Agent B: `backend`
+  - Agent C: `qa` (default) / `database` (if schema-driven)
 
 ## Collaboration constraints
 - 各 agent 只修改自己负责目录或文件域。
@@ -91,14 +100,14 @@ description: 在需求文档或技术设计文档进入任务拆分前，先做�
 
 ```md
 Delivery Mode: Single Owner | Multi-Role Team
-Template: module-isolated | cross-layer | none
+Template: module-isolated | cross-layer | user-forced-multi-agent | none
 Why:
 - <最多 3 条，直接对应检查项>
 
 Time Estimate:
 - T_single: <value>
 - T_multi: <value, include coordination overhead>
-- Efficiency Gain: <percentage, must be >=30% for Multi-Role Team>
+- Efficiency Gain: <percentage, must be >=30% for Multi-Role Team; if user-forced, write "user override">
 
 Assignments:
 - Agent A: ...
@@ -108,6 +117,7 @@ Assignments:
 Next step:
 - Multi-Role Team: 按固定模板执行并保持角色边界
 - Single Owner: 立即回到单 item auto-build loop
+- 执行要求: Gate 输出后立即由调用方进入下一阶段，不等待额外“是否继续”确认
 ```
 
 ## Optional extension

@@ -104,7 +104,7 @@ version: 0.6.1
 1. 运行 `sprint-planning` 完成交付模式决策与路由（输入/产出/退出条件以该 skill 定义为准）。
    - 结果 A：多人力多 epic（每个 agent 一个 epic）
    - 结果 B：单人力单 epic
-2. 若命中结果 A（多人力多 epic），自动调用 `multi-agent-workflow-kickoff` 发送团队启动消息。
+2. 若命中结果 A（多人力多 epic），自动调用 `multi-agent-workflow-kickoff` 实际创建并启动并行 agents（不是仅发送文本消息）。
 3. 对每个被启用的 epic，运行 `epic-breakdown` 完成初始化。
    - 自检：`BACKLOG.md` 的目标 Epic 分组头部必须包含：
      - `Epic branch: epic/<epic-name>`
