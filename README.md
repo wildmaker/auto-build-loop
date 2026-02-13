@@ -1,4 +1,4 @@
-# auto-build-loop
+# Epic Auto Build v2 — Skill Pack
 
 ```text
                   .-========================-.
@@ -17,140 +17,202 @@
                      auto-build-loop
 ```
 
-## Quick Start
+一套用于 **自动化开发 Epic 级需求** 的 AI Skill Pack。
+核心流程：**Sprint Planning → SDD Loop → Review / Demo → Stabilization → Merge**。
 
-先完成以下 2 步，再触发自动化流程：
+---
 
-1. 使用 GPT PRO 产出整体设计思路，并将文档保存到项目内（例如 `docs/blueprint.md`）。
-2. 在 CLI 中使用 `@auto-build-v2` 并附上文档路径。
+## Table of Contents
 
-```bash
-@auto-build-v2 docs/blueprint.md
+- [Workflow Overview](#workflow-overview)
+- [Quick Start](#quick-start)
+- [Prerequisites](#prerequisites)
+- [Flow Canvas（详细流程图）](#flow-canvas)
+- [Included Skills](#included-skills)
+
+---
+
+## Workflow Overview
+
+```mermaid
+flowchart TD
+    A["Sprint Planning<br/>模式决策 · 拆分待办 · 初始化 epic"] --> B["SDD Loop<br/>逐条交付 backlog item"]
+    B --> C{"还有未完成项?"}
+    C -- Yes --> B
+    C -- No --> S["Engineering Sign-off<br/>Backlog / Spec / Branch 一致性检查"]
+    S --> D["Review / Demo<br/>生成报告 · 价值验收演示"]
+    D --> E["Stabilization<br/>集中测试 · 问题分流"]
+    E --> F["Fix<br/>修 bug · 补测试 · 对齐 Spec"]
+    E --> G["Change<br/>需求变更回到 SDD Loop"]
+    G --> B
+    F --> H{"ready_for_merge?"}
+    H -- No --> E
+    H -- Yes --> I["Merge to Main<br/>epic 分支合并到主分支"]
+    I --> J["Cleanup<br/>用户确认后清理 spec 分支"]
 ```
 
-这个目录用于分发 Epic 自动化开发流程（Plan -> SDD Loop -> Review/Demo -> Stabilization -> Merge）。
+---
+
+## Quick Start
+
+1. **准备设计文档** — 使用强模型（如 ChatGPT-Pro、Claude Opus）产出技术设计文档，保存至项目内（如 `docs/blueprint.md`）。
+2. **触发流程** — 在 AI Agent 中运行：
+
+```text
+@epic-auto-build-v2 docs/blueprint.md
+```
+
+流程将自动完成：规划 → 逐条开发 → 评审演示 → 稳定化 → 合并。
+
+---
 
 ## Prerequisites
 
-在运行本 Skill Pack 前，请先完成以下准备工作。
+> 在运行本 Skill Pack 前，请逐项确认以下准备工作。
 
-### 1) 基础环境
+### 1. 基础工具
 
-- 安装 `git`、`gh`（GitHub CLI）、`node`（若你的项目依赖前端工具链）、`python`（若你的项目依赖 Python 工具链）。
+| 工具 | 用途 | 必需? |
+|------|------|-------|
+| `git` | 版本控制 | 是 |
+| `gh` (GitHub CLI) | 创建/管理 Issue、PR | 是 |
+| `node` / `python` | 项目依赖的语言运行时 | 视项目而定 |
+
 - 完成 `gh auth login`，确保当前仓库可创建/查看 Issue 与 PR。
+- 若使用 Claude Teams，确保已登录对应团队工作区并具备项目访问权限。
 
-### 2) 安装并初始化 OpenSpec
+### 2. 安装并初始化 OpenSpec
 
 - 安装 OpenSpec CLI（按你团队的标准安装方式）。
-- 在仓库根目录初始化 OpenSpec（只需一次）：
-  - 若你已安装本仓库 skill：使用 `openspec-init` skill 执行初始化。
-  - 或直接使用 OpenSpec CLI 完成 init，并确认 `OpenSpec/` 目录已生成。
-- 初始化后建议先跑一次校验命令（例如 validate/lint）确认环境可用。
+- 在仓库根目录初始化（只需一次）：
+  - 方式 A：使用 `openspec-init` skill 执行初始化。
+  - 方式 B：直接运行 OpenSpec CLI init，确认 `OpenSpec/` 目录已生成。
+- 建议先跑一次校验命令（如 `openspec validate`）确认环境可用。
 
-### 3) 初始化 Codex 技能环境（推荐）
+### 3. 链接 Skill Pack 到本地
 
-- 将本仓库技能链接到本地 `~/.codex/skills`：
-  - `bash codex/skills/sync-codex-skills-to-cloud/scripts/link_repo_skills_to_codex.sh`
-- 验证关键技能可见：`epic-auto-build-v2`、`epic-sdd-loop`、`openspec-init-change`、`git-pr-review`。
+将本仓库技能同步到本地环境：
 
-### 4) 使用 Codex 或 Claude 初始化项目上下文
-
-- Codex 路径（推荐）：
-  - 在仓库根目录准备 `AGENTS.md`（项目约束、分支策略、测试命令、文档路径约定）。
-  - 如需 OpenSpec 引导内容，可执行 `openspec-init` 并按提示把 bootstrap 规则写入 `AGENTS.md`。
-- Claude 路径（可选）：
-  - 在 Claude Code 中打开同一仓库，补齐等价的项目约束文档（例如 `AGENTS.md`/`CLAUDE.md`）。
-  - 确保与本 README 的流程约束一致：`main -> epic/* -> spec/*`，以及 `spec/* -> epic/*` 的 PR 方向。
-
-### 5) 启动 Epic 流程前检查清单
-
-- 已有明确设计文档（Blueprint/PRD/Tech Plan）。
-- 已确定 `<epic-name>`，并约定 `epic/<epic-name>` 分支名。
-- 仓库根目录将使用唯一 `BACKLOG.md` 作为执行源。
-- 团队已同意 Review Gate：等待远端 review + 处理 High/Medium + CI 全绿后合并。
-- 已为 AI Agent 提供足够权限（permission）：至少允许读取/修改仓库文件、创建分支、执行 `git`/`gh`/`openspec` 命令；若权限不足，`epic-auto-build-v2` 会在中途阻塞。
-
-## Included workflow entry points
-- epic-auto-build-v2
-- epic-stabilization
-- codex/skills/epic-auto-build-v2/references/epic-workflow.md
-
-## Included dependent skills
-- epic-breakdown
-- epic-sdd-loop
-- epic-engineering-sign-off
-- epic-review-demo
-- epic-issue-triage
-- epic-fix-stabilization
-- epic-merge-to-main
-- blueprint-compiler
-- backlog-generate
-- backlog-issue-sync
-- backlog-write-back
-- openspec-init-change
-- git-pr-review
-- git-merge-recent-pr
-- git-create-pr
-- git-resolve-pr-comments
-- check-env
-- report-it-to-me
-- xmind
-
-## Simple workflow overview
-
-```mermaid
-flowchart TD
-    A["1. Planning & Scope Lock<br/>- 明确目标与交付边界<br/>- 拆分可独立完成的工作项<br/>- 建立统一工作基线"] --> B["2. Iterative Delivery Loop（一次一个工作项）<br/>- 选择一个未完成任务<br/>- 在隔离环境中实现<br/>- 本地校验 + 自动化检查<br/>- 提交审查（PR / CI）<br/>- 合并到集成分支"]
-    B --> C{"是否还有未完成项"}
-    C -- 是 --> B
-    C -- 否 --> D["3. Integrated Review / Demo<br/>- 全量功能可运行<br/>- 与最初目标对齐<br/>- 工程层面完成确认"]
-    D --> E["4. Stabilization & Triage<br/>- 集中测试<br/>- 问题分类与分流"]
-    E --> F["Implementation Bugs / Gaps<br/>- 修复实现<br/>- 补测试"]
-    E --> G["Requirement / Behavior Change<br/>- 回到迭代流程<br/>- 重新定义目标"]
-    F --> H["重新进入 2 或 4"]
-    G --> H
-    H --> I["5. Release / Merge to Main<br/>- 明确发布条件满足<br/>- 合并至主线<br/>- 标记交付完成"]
-    I --> J["6. Post-Completion Cleanup（可选）<br/>- 归档过程产物<br/>- 清理临时分支 / 资源<br/>- 必须显式确认"]
+```bash
+bash codex/skills/sync-codex-skills-to-cloud/scripts/link_repo_skills_to_codex.sh
 ```
 
-## Flow canvas
+验证关键技能可见：`epic-auto-build-v2`、`epic-sdd-loop`、`openspec-init-change`、`git-pr-review`。
 
-> 目标：用一张图快速说明 `epic-auto-build-v2` 的执行阶段、强约束与回路。
+### 4. 初始化项目上下文
+
+在目标仓库中准备 `AGENTS.md`（项目约束、分支策略、测试命令、文档路径约定）：
+
+- **Codex 路径（推荐）**：执行 `openspec-init` 并按提示把 bootstrap 规则写入 `AGENTS.md`。
+- **Claude 路径（可选）**：在 Claude Code 中补齐等价约束文档（`AGENTS.md` / `CLAUDE.md`），确保分支策略与本流程一致：`main → epic/* → spec/*`。
+
+### 5. 启动前检查清单
+
+- [ ] 已有明确设计文档（Blueprint / PRD / Tech Plan）
+- [ ] 已确定 `<epic-name>` 及 `epic/<epic-name>` 分支名
+- [ ] 仓库根目录将使用唯一 `BACKLOG.md` 作为执行源
+- [ ] 团队已同意 Review Gate：远端 review + High/Medium 闭环 + CI 全绿后合并
+- [ ] AI Agent 具备足够权限：读取/修改文件、创建分支、执行 `git` / `gh` / `openspec` 命令
+
+---
+
+## Flow Canvas
+
+> 用一张图完整说明 `epic-auto-build-v2` 的执行阶段、门禁、回路与调用的核心 Skill。
 
 ```mermaid
 flowchart TD
-    A[Start: User explicitly triggers epic-auto-build-v2] --> B[Phase 1 Plan\nepic-breakdown]
-    B --> B1[Output:\nImplementation Plan.md\nBACKLOG.md Epic section\nIssues aligned\nepic/<epic-name> branch]
-    B1 --> G1{Plan gate passed?}
-    G1 -- No --> BX[Stop: complete Plan artifacts first]
-    G1 -- Yes --> C[Phase 2 SDD LOOP\nPick first unfinished backlog item]
+    START["<b>触发入口</b><br/>用户明确运行 epic-auto-build-v2"] --> P1
 
-    C --> C1[Map item -> Issue + spec-name\nCreate spec/<spec-name> from epic branch]
-    C1 --> C2[openspec-init-change + apply\nImplement + local checks]
-    C2 --> C3[Create PR: spec/* -> epic/*\nReview loop + CI green]
-    C3 --> C4[Merge to epic/*\nArchive spec change via archive PR]
-    C4 --> D{More unfinished items?}
-    D -- Yes --> C
-    D -- No --> E[Phase 3 Review/Demo\nengineering-sign-off -> review-demo\nGenerate EPIC-REPORT]
+    subgraph P1["Phase 1 — Sprint Planning"]
+        P1A["sprint-planning<br/>交付模式决策"] --> P1B{"多人力 or 单人力?<br/><i>multi-agent-parallel-gate</i>"}
+        P1B -- "多人力多 Epic" --> P1C["multi-agent-workflow-kickoff<br/>创建并启动并行 agents"]
+        P1B -- "单人力单 Epic" --> P1D["epic-breakdown<br/>Plan · Backlog · Issue · epic 分支"]
+        P1C --> P1D
+    end
 
-    E --> F[Phase 4 Stabilization\ntriage issues from testing]
-    F --> F1{Issue type?}
-    F1 -- Fix --> F2[epic-fix-stabilization\nFix-only: bug/test/spec-alignment]
-    F1 -- Change --> F3[Back to SDD LOOP via epic-sdd-loop]
-    F2 --> F4{ready_for_merge = true?}
-    F3 --> F4
-    F4 -- No --> F
-    F4 -- Yes --> H[Phase 5 Merge\nepic/* -> main]
+    P1D --> P1Gate{"初始化产物齐全?<br/>Plan / Backlog / Issue / 分支"}
+    P1Gate -- 否 --> STOP["停止：先补齐规划产物"]
+    P1Gate -- 是 --> P2
 
-    H --> I[Post phase\nOptional: delete merged spec/* branches\nonly with explicit user confirmation]
-    I --> J[Done]
+    subgraph P2["Phase 2 — SDD Loop（逐条交付）"]
+        P2A["自动选取下一个未完成 item<br/><i>按 BACKLOG.md 顺序</i>"] --> P2B["epic-sdd-loop<br/>spec 分支 → 实现 → PR 评审 → 合并"]
+        P2B --> P2C["backlog-write-back<br/>回写 Done + issue/pr/spec 引用"]
+        P2C --> P2D{"还有未完成项?"}
+        P2D -- 是 --> P2A
+    end
+
+    P2D -- 否 --> SIGNOFF["epic-engineering-sign-off<br/>Backlog · Spec · Branch 一致性检查"]
+
+    SIGNOFF --> P3
+
+    subgraph P3["Phase 3 — Review / Demo"]
+        P3A["生成 EPIC-REPORT.md<br/>+ report-it-to-me 导图化"] --> P3B["epic-review-demo<br/>按 Plan 定义的 Demo 流程验收"]
+    end
+
+    P3B --> P4
+
+    subgraph P4["Phase 4 — Stabilization"]
+        P4A["集中测试 → 生成问题清单"] --> P4B{"epic-issue-triage<br/>问题分流"}
+        P4B -- Fix --> P4C["epic-fix-stabilization<br/>修 bug · 补测试 · 对齐 Spec"]
+        P4B -- Change --> P4D["回到 SDD Loop<br/>走 epic-sdd-loop 交付变更"]
+    end
+
+    P4D --> P2A
+    P4C --> P4E{"ready_for_merge?"}
+    P4E -- 否 --> P4A
+    P4E -- 是 --> P5
+
+    P5["<b>Phase 5 — Merge to Main</b><br/>epic-merge-to-main"] --> POST["<b>Post: Spec 分支清理</b><br/>用户确认后批量删除 spec/* 分支"]
 ```
 
 ### Reading Guide
 
-- `Phase 1` 是硬门禁：没有 `Plan + Backlog + Issues + epic branch`，后续全部不允许开始。
-- `Phase 2` 是单条循环：一次只做一个 backlog item，且必须走 `spec/* -> epic/*`，不能直连 `main`。
-- `PR Gate` 是必经点：必须等远端 review 出现并闭环 High/Medium，且 CI 全绿后才可合并。
-- `Phase 4` 是收敛分流：Fix 留在稳定化链路，Change 回流到 `SDD LOOP` 重新走 Spec 驱动交付。
-- 只有 `ready_for_merge: true` 才能进入 `epic/* -> main`。
-- `spec/*` 分支默认保留，只有在 Epic 完成后且用户明确确认才批量清理。
+| 阶段 | 要点 | 门禁条件 |
+|------|------|----------|
+| **Phase 1 Sprint Planning** | 通过 `multi-agent-parallel-gate` 做模式决策（单人 / 多人），再由 `epic-breakdown` 产出 Plan、Backlog、Issue 和 epic 分支 | 所有初始化产物齐全才进入 Phase 2 |
+| **Phase 2 SDD Loop** | 强制单条交付：自动选取第一个未完成 item → `epic-sdd-loop` → `backlog-write-back`；分支走 `spec/* → epic/*` | 每条 item 的 PR 通过 review + CI 全绿后合并 |
+| **Engineering Sign-off** | `epic-engineering-sign-off` 做 Backlog / Spec / Branch 三项一致性检查 | 全部通过才进入 Phase 3 |
+| **Phase 3 Review / Demo** | 生成汇总报告（Markdown + `.xmind`），再由 `epic-review-demo` 执行价值验收演示 | 产物提交到 epic 分支 |
+| **Phase 4 Stabilization** | `epic-issue-triage` 分流：**Fix**（修 bug、对齐 Spec）→ `epic-fix-stabilization`；**Change**（需求变更）→ 回 SDD Loop | `ready_for_merge = true` 才进入 Phase 5 |
+| **Phase 5 Merge** | `epic-merge-to-main` 将 epic 分支合并回 main | — |
+| **Post: Cleanup** | 汇总 `spec/*` 分支列表，**需用户确认**后才批量删除 | 默认保留，不自动删除 |
+
+---
+
+## Included Skills
+
+### Workflow Entry Points（流程入口）
+
+| Skill | 说明 |
+|-------|------|
+| `epic-auto-build-v2` | 全流程编排器（5 阶段一键执行） |
+| `epic-stabilization` | 单独触发稳定化阶段（Phase 4） |
+| `references/epic-workflow.md` | 工作流关系模型与强约束定义 |
+
+### Dependent Skills（依赖技能）
+
+| Skill | 阶段 | 说明 |
+|-------|------|------|
+| `sprint-planning` | Phase 1 | 交付模式决策（单人 / 多人） |
+| `multi-agent-parallel-gate` | Phase 1 | 并行效率评估门禁 |
+| `multi-agent-workflow-kickoff` | Phase 1 | 多 agent 并行启动 |
+| `epic-breakdown` | Phase 1 | Plan → Backlog → Issue → 分支初始化 |
+| `blueprint-compiler` | Phase 1 | 设计文档编译为实施计划 |
+| `backlog-generate` | Phase 1 | 从设计文档生成 Backlog |
+| `backlog-issue-sync` | Phase 1 | Backlog ↔ GitHub Issue 同步 |
+| `epic-sdd-loop` | Phase 2 | 单条 backlog item 交付循环 |
+| `openspec-init-change` | Phase 2 | 初始化 OpenSpec 变更 + Issue |
+| `backlog-write-back` | Phase 2 | 完成后回写状态到 BACKLOG.md |
+| `git-pr-review` | Phase 2 | PR 创建 + 评审闭环 |
+| `git-resolve-pr-comments` | Phase 2 | 处理 PR 评审评论 |
+| `git-merge-recent-pr` | Phase 2 | 合并最近 PR 并同步分支 |
+| `git-create-pr` | Phase 2 | 创建 PR |
+| `epic-engineering-sign-off` | Phase 2→3 | Backlog / Spec / Branch 一致性检查 |
+| `epic-review-demo` | Phase 3 | 核心场景演示与验收 |
+| `report-it-to-me` | Phase 3 | Markdown 报告转 XMind 导图 |
+| `xmind` | Phase 3 | XMind 文件操作 |
+| `epic-issue-triage` | Phase 4 | 问题分流（Fix / Change） |
+| `epic-fix-stabilization` | Phase 4 | 集中修复（仅 bug + 补测试） |
+| `epic-merge-to-main` | Phase 5 | Epic 分支合并回 main |
+| `check-env` | 通用 | 检查环境变量配置 |
